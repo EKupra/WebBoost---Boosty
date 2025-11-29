@@ -53,36 +53,58 @@ View the detailed presentation about Boosty:
 
 ### Installation
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/EKupra/boosty.git
-   cd boosty
-   ```
+## 🚀 Installation Guide
 
-2. **Create and activate a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+Follow these steps to run WebBoost — Boosty locally on your machine.
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 📌 Prerequisites
+You need the following installed on your system:
+- Python 3.8 or higher
+- pip (Python package manager)
+- virtualenv or Python’s built-in venv module
 
-4. **Download NLP Data**:
-   ```bash
-   python -m textblob.download_corpora
-   python -m nltk.downloader vader_lexicon punkt
-   ```
+### 🔧 Step 1: Clone the Repository
+Clone the project and enter the project folder:
+git clone https://github.com/EKupra/WebBoost---Boosty.git
+cd WebBoost---Boosty
 
-5. **Start the development server**:
-   ```bash
-   python manage.py runserver 8001
-   ```
+### 🌱 Step 2: Create and Activate a Virtual Environment
+Create and activate a virtual environment depending on your operating system.
 
-6. **Open your browser**:
-   Navigate to `http://127.0.0.1:8001`
+On macOS / Linux:
+python3 -m venv venv
+source venv/bin/activate
+
+On Windows (PowerShell):
+python -m venv venv
+venv\Scripts\Activate.ps1
+
+On Windows (CMD):
+venv\Scripts\activate.bat
+
+### 📦 Step 3: Install Dependencies
+Install all required packages:
+pip install -r requirements.txt
+
+### 📚 Step 4: Download NLP Datasets
+Download necessary corpora for TextBlob and NLTK:
+python -m textblob.download_corpora
+python -m nltk.downloader vader_lexicon punkt
+
+### 🗄️ Step 5: Apply Migrations
+Set up the database:
+python manage.py migrate
+
+### ▶️ Step 6: Run the Server
+Start the local development server:
+python manage.py runserver 8001
+
+### 🌐 Step 7: Open in Browser
+Open your browser and go to:
+http://127.0.0.1:8001
+
+You can now use WebBoost — Boosty to analyze any blog for SEO insights, sentiment, readability, and more.
+
 
 ## 💡 Usage
 
