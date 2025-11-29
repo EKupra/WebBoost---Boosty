@@ -24,8 +24,8 @@
         </div>
         <div class="flex items-center gap-4">
             <!-- Share Dropdown -->
-            <div class="relative group">
-                <button
+            <div class="relative">
+                <button onclick="toggleDropdown('share-dropdown')"
                     class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -37,8 +37,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div
-                    class="hidden group-hover:block absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div id="share-dropdown"
+                    class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <button onclick="window.print()"
                         class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,21 +74,21 @@
                 </div>
             </div>
 
-            <!-- Personal Cabinet Dropdown -->
+            <!-- My Account Dropdown -->
             <div class="relative">
-                <button onclick="toggleDropdown('cabinet-dropdown')"
+                <button onclick="toggleDropdown('account-dropdown')"
                     class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 rounded-md transition-opacity">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    My Cabinet
+                    My Account
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="cabinet-dropdown"
+                <div id="account-dropdown"
                     class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <a href="/premium-dashboard/#badges"
                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3">
@@ -308,12 +308,19 @@
                 dropdown.classList.toggle('hidden');
             }
 
-            // Close dropdown when clicking outside
+            // Close dropdowns when clicking outside
             document.addEventListener('click', function (event) {
-                const dropdown = document.getElementById('cabinet-dropdown');
+                const accountDropdown = document.getElementById('account-dropdown');
+                const shareDropdown = document.getElementById('share-dropdown');
                 const button = event.target.closest('button[onclick*="toggleDropdown"]');
-                if (!button && dropdown && !dropdown.contains(event.target)) {
-                    dropdown.classList.add('hidden');
+
+                if (!button) {
+                    if (accountDropdown && !accountDropdown.contains(event.target)) {
+                        accountDropdown.classList.add('hidden');
+                    }
+                    if (shareDropdown && !shareDropdown.contains(event.target)) {
+                        shareDropdown.classList.add('hidden');
+                    }
                 }
             });
 
