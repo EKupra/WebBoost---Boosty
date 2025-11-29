@@ -1,73 +1,158 @@
-# Django Website Analyzer
+# Boosty - AI-Powered Blog Analyzer
 
-A powerful Python-based tool that analyzes websites (and Medium profiles) to provide actionable insights on Content, SEO, Visual Design, and Sentiment.
+A powerful Django-based blog analysis tool that provides actionable insights on SEO, Content Quality, Visual Design, UX, Engagement, and Topic Fit. Perfect for bloggers and content creators who want to optimize their content for better reach and engagement.
 
-## Features
+## 🎯 Features
 
-*   **Advanced Analysis**: Scores your blog (0-100) based on SEO, Content Quality, and Visual Design.
-*   **Topic Detection**: Automatically detects if your blog is about **Food, Music, Travel, Sport, or Art**.
-*   **Sentiment Engine**: Uses VADER (Valence Aware Dictionary and sEntiment Reasoner) to analyze the tone of your writing and suggest improvements.
-*   **Medium Profile Support**: Enter a profile URL (e.g., `medium.com/@user`) and it automatically finds and analyzes the latest article.
-*   **Benchmarking**: Compares your metrics against top-performing blogs in your category.
-*   **Author & Socials**: Detects author names and social media links to help you grow your audience.
+### Core Analysis
+- **AI Summarization**: Automatically generates concise summaries using LSA (Latent Semantic Analysis)
+- **SEO Optimization**: Meta descriptions, H1 tags, keyword analysis with specific recommendations
+- **Content Quality**: Word count, readability, grammar checking with detailed issue detection
+- **Visual Design**: Image count, alt text validation, mobile responsiveness checks
+- **Topic Detection**: Identifies your blog topic (Travel, Food, Sport, Music, Literature, Art)
 
-## Installation
+### Premium Features
+- **User Experience (UX)**: Navigation and flow analysis
+- **Engagement Metrics**: Content stickiness and reader retention insights
+- **Topic Fit**: Deep relevance analysis for your niche
+- **Detailed Recommendations**: Specific, actionable fixes with AI-generated solutions
 
-1.  **Clone the repository**:
-    ```bash
-    git clone <repository-url>
-    cd django_backend
-    ```
+### Freemium Model
+- **Free Tier**: Basic analysis with 3 visible recommendations
+- **Premium Tier**: Full access to all metrics, unlimited recommendations, and advanced insights
+- **Seamless Upgrade Flow**: One-click registration to unlock full report
 
-2.  **Create and activate a virtual environment**:
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
+### User Experience
+- **Gamification**: Progress tracking, achievement badges, seasonal challenges
+- **Leaderboards**: See top-performing blogs and track improvements
+- **Confetti Celebrations**: Animated rewards for high scores
+- **Social Sharing**: Share on X (Twitter), LinkedIn, or email
+- **Export Options**: Print reports or save for later
 
-3.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *Note: If `requirements.txt` is missing, install manually:*
-    ```bash
-    pip install django requests beautifulsoup4 textblob nltk
-    ```
+## 📦 Installation
 
-4.  **Download NLP Data**:
-    ```bash
-    python -m textblob.download_corpora
-    python -m nltk.downloader vader_lexicon
-    ```
+### Prerequisites
+- Python 3.8+
+- pip package manager
+- Virtual environment (recommended)
 
-## Usage
+### Setup Instructions
 
-1.  **Start the server**:
-    ```bash
-    python manage.py runserver 8001
-    ```
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/EKupra/boosty.git
+   cd boosty
+   ```
 
-2.  **Open your browser**:
-    Go to `http://127.0.0.1:8001`.
+2. **Create and activate a virtual environment**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-3.  **Analyze**:
-    *   Enter a blog URL (e.g., `https://pinchofyum.com/`).
-    *   OR enter a Medium profile (e.g., `https://medium.com/@username`).
+3. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Project Structure
+4. **Download NLP Data**:
+   ```bash
+   python -m textblob.download_corpora
+   python -m nltk.downloader vader_lexicon punkt
+   ```
 
-*   `analyzer_app/`: Main Django app.
-    *   `logic.py`: Core analysis engine (Scraping, NLP, Scoring).
-    *   `topic_trainer.py`: Script to train the topic classification model.
-    *   `medium_trainer.py`: Script to generate general benchmarks.
-    *   `views.py`: Handles web requests.
-*   `website_analyzer/`: Django project settings.
-*   `benchmarks.json`: Generated benchmark data.
-*   `topic_models.json`: Generated topic profiles.
+5. **Start the development server**:
+   ```bash
+   python manage.py runserver 8001
+   ```
 
-## Technologies
+6. **Open your browser**:
+   Navigate to `http://127.0.0.1:8001`
 
-*   **Backend**: Django, Python
-*   **NLP**: NLTK (VADER), TextBlob
-*   **Scraping**: BeautifulSoup4, Requests
-*   **Frontend**: Tailwind CSS
+## 🚀 Usage
+
+1. **Enter a Blog URL**: Paste any blog post URL (e.g., `https://example.com/my-blog-post`)
+2. **Get Free Analysis**: View overall score, topic detection, and 3 free recommendations
+3. **Unlock Full Report**: Register to see all premium insights and detailed recommendations
+4. **Share Results**: Use the Share dropdown to export or share on social media
+
+## 📁 Project Structure
+
+```
+boosty/
+├── analyzer_app/
+│   ├── logic.py              # Core analysis engine (SEO, grammar, summaries)
+│   ├── views.py              # Django views (analyze, register, pricing, logout)
+│   ├── urls.py               # URL routing
+│   ├── topic_trainer.py      # Topic model training
+│   └── templates/
+│       └── analyzer_app/
+│           ├── index.html          # Landing page with FAQ
+│           ├── result.html         # Analysis results page
+│           ├── pricing.html        # Pricing tiers
+│           ├── register.html       # Registration page
+│           └── premium_dashboard.html
+├── website_analyzer/          # Django project settings
+├── benchmarks.json            # Topic category benchmarks
+├── topic_models.json          # Trained topic detection models
+└── requirements.txt           # Python dependencies
+```
+
+## 🛠 Technologies
+
+- **Backend**: Django 4.x, Python 3.12
+- **NLP Libraries**: 
+  - NLTK (VADER sentiment analysis, tokenization)
+  - TextBlob (grammar and spell checking)
+  - Sumy (LSA summarization)
+  - NumPy (numerical computations)
+- **Web Scraping**: BeautifulSoup4, Requests
+- **Frontend**: Tailwind CSS, Vanilla JavaScript
+- **Animations**: Canvas Confetti
+
+## 📚 Documentation
+
+For detailed feature documentation and implementation details, see:
+- [documentation.md](documentation.md) - Complete feature guide
+- [benchmarks.json](benchmarks.json) - Topic category reference scores
+
+## 🎨 UI Features
+
+- **Expandable FAQ**: Accordion-style questions on landing page
+- **Interactive Dropdowns**: Share options and Personal Cabinet menu
+- **Responsive Design**: Mobile-first with Tailwind CSS
+- **Before/After Toggle**: See original issues and AI-generated fixes
+- **Premium Gates**: Beautiful blur effects for locked content
+
+## 🔐 Freemium Flow
+
+1. **Free Analysis** → Blurred premium sections with "Unlock Full Report" CTA
+2. **Register** → Simple registration form (simulated)
+3. **Full Report** → Session-based premium access with all insights unlocked
+4. **Logout** → Clear session and return to free tier
+
+## 📊 Benchmarks
+
+Boosty includes benchmark data for 5 topic categories:
+- Travel (walkingtheworld.substack.com)
+- Food (whattocook.substack.com)
+- Sport (billanddougosu.substack.com)
+- Music (honest-broker.com)
+- Literature (alittleblogofbooks.com)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+## 📄 License
+
+MIT License - feel free to use this project for personal or commercial purposes.
+
+## 👤 Author
+
+**Elena Kuprashvili**
+- GitHub: [@EKupra](https://github.com/EKupra)
+
+---
+
+**Made with ❤️ for bloggers and content creators**

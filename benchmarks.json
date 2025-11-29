@@ -1,6 +1,47 @@
 {
-  "word_count": 1500,
-  "image_count": 5,
-  "heading_count": 8,
-  "avg_paragraph_len": 40
+  "Travel": {
+    "url": "https://walkingtheworld.substack.com/",
+    "scores": {
+      "overall": 85,
+      "discoverability": 90,
+      "content": 88,
+      "visual": 82
+    }
+  },
+  "Food": {
+    "url": "https://whattocook.substack.com/",
+    "scores": {
+      "overall": 82,
+      "discoverability": 85,
+      "content": 85,
+      "visual": 78
+    }
+  },
+  "Sport": {
+    "url": "https://billanddougosu.substack.com/",
+    "scores": {
+      "overall": 80,
+      "discoverability": 82,
+      "content": 83,
+      "visual": 75
+    }
+  },
+  "Music": {
+    "url": "https://www.honest-broker.com/",
+    "scores": {
+      "overall": 88,
+      "discoverability": 92,
+      "content": 90,
+      "visual": 83
+    }
+  },
+  "Literature": {
+    "url": "https://alittleblogofbooks.com/",
+    "scores": {
+      "overall": 84,
+      "discoverability": 87,
+      "content": 86,
+      "visual": 80
+    }
+  }
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cabinet - Boosty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900">
+
+    <nav class="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100">
+        <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 bg-purple-600 rounded-full"></div>
+            <span class="font-semibold text-lg">Boosty</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <a href="/" class="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium">New Analysis</a>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-6">My Cabinet</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Progress Card -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                <h3 class="font-bold text-lg mb-2">My Progress</h3>
+                <div class="text-4xl font-bold text-purple-600 mb-1">Level 3</div>
+                <p class="text-sm text-gray-500">Keep improving your blog scores!</p>
+                <div class="w-full bg-gray-100 rounded-full h-2 mt-4">
+                    <div class="bg-purple-500 h-2 rounded-full" style="width: 60%"></div>
+                </div>
+            </div>
+
+            <!-- Badges Card -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                <h3 class="font-bold text-lg mb-2">My Badges</h3>
+                <div class="flex gap-2 mt-4">
+                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-xl"
+                        title="First Analysis">🥇</div>
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-xl"
+                        title="SEO Master">🚀</div>
+                    <div
+                        class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl text-gray-400 border border-dashed border-gray-300">
+                        ?</div>
+                </div>
+            </div>
+
+            <!-- Settings Card -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                <h3 class="font-bold text-lg mb-2">Settings</h3>
+                <p class="text-sm text-gray-500 mb-4">Manage your subscription and preferences</p>
+                <button class="text-purple-600 text-sm font-medium hover:underline">Manage Account</button>
+            </div>
+        </div>
+
+        <div class="bg-purple-50 p-8 rounded-xl border border-purple-100 text-center">
+            <h2 class="text-xl font-bold mb-2">Ready for a new analysis?</h2>
+            <p class="text-gray-600 mb-6">Check your latest blog post improvements</p>
+            <form action="/analyze/" method="post" class="max-w-xl mx-auto flex gap-2">
+                {% csrf_token %}
+                <input type="url" name="url" placeholder="Enter blog URL..." required
+                    class="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <button type="submit"
+                    class="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700">Analyze</button>
+            </form>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

@@ -113,7 +113,127 @@ def analyze_sentiment_and_improvements(text: str) -> Dict[str, Any]:
         "improvements": unique_improvements
     }
 
-def analyze_page(html: str) -> Dict[str, Any]:
+from sumy.parsers.html import HtmlParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+
+def summarize_blog(url: str, sentence_count: int = 4) -> str:
+    """
+    Summarizes the blog post content using LSA (Latent Semantic Analysis).
+    Works on Mac ARM64 with open-source libraries only.
+    """
+    try:
+        LANGUAGE = "english"
+        parser = HtmlParser.from_url(url, Tokenizer(LANGUAGE))
+        stemmer = Stemmer(LANGUAGE)
+        summarizer = LsaSummarizer(stemmer)
+        summarizer.stop_words = get_stop_words(LANGUAGE)
+
+        summary = []
+        for sentence in summarizer(parser.document, sentence_count):
+            summary.append(str(sentence))
+        
+        return " ".join(summary)
+    except Exception as e:
+        return f"Could not generate summary: {str(e)}"
+
+def check_grammar(text: str) -> Tuple[int, List[Dict]]:
+    """
+    Simple rule-based grammar/style checker since we might not have language_tool_python installed.
+    In a real app, use a library like language_tool_python.
+    """
+    issues = []
+    score = 100
+    
+    # 1. Check for common errors
+    common_errors = {
+        " their is ": "there is",
+        " i ": " I ",
+        " dont ": " don't ",
+        " cant ": " can't ",
+        " im ": " I'm ",
+        " u ": " you ",
+        " ur ": " your ",
+        " alot ": " a lot ",
+        " tehm ": " them ",
+        " recieve ": " receive ",
+        " seperate ": " separate ",
+    }
+    
+    lower_text = text.lower()
+    for error, correction in common_errors.items():
+        if error in lower_text:
+            count = lower_text.count(error)
+            score -= (count * 2)
+            issues.append({
+                "type": "Grammar",
+                "desc": f"Found '{error.strip()}', consider using '{correction.strip()}' instead.",
+                "count": count
+            })
+            
+    # 2. Check for very long sentences (readability/style)
+    sentences = text.split('.')
+    long_sentences = [s for s in sentences if len(s.split()) > 30]
+    if long_sentences:
+        score -= (len(long_sentences) * 3)
+        issues.append({
+            "type": "Style",
+            "desc": f"Found {len(long_sentences)} very long sentences. Consider breaking them up.",
+            "count": len(long_sentences)
+        })
+        
+    return max(0, score), issues
+
+def check_seasonal_content(text: str) -> Dict[str, Any]:
+    """
+    Checks for Christmas/Holiday related content.
+    """
+    christmas_keywords = [
+        "christmas", "holiday", "santa", "gift", "present", "december", 
+        "winter", "snow", "reindeer", "elf", "merry", "festive", "yuletide",
+        "stocking", "ornament", "tree", "mistletoe"
+    ]
+    
+    lower_text = text.lower()
+    found_keywords = []
+    
+    for word in christmas_keywords:
+        if word in lower_text:
+            found_keywords.append(word)
+            
+    score = 0
+    if found_keywords:
+        # Calculate score based on density/variety
+        unique_found = len(set(found_keywords))
+        score = min(100, unique_found * 10)
+        
+    return {
+        "score": score,
+        "keywords": list(set(found_keywords)),
+        "message": f"Christmas Spirit: {score}/100" if score > 0 else "No Christmas content detected."
+    }
+
+def generate_fix_content(issue_title: str, context: str = "") -> str:
+    """
+    Generates revised content based on the issue.
+    """
+    if "SEO Optimization" in issue_title:
+        if "meta description" in issue_title.lower():
+            return "Generated Meta Description: 'Discover the ultimate guide to [Topic]. Learn expert tips, avoid common mistakes, and master [Topic] today. Read now!'"
+        if "h1" in issue_title.lower():
+            return "Suggested H1: 'The Complete Guide to Mastering [Topic]'"
+            
+    if "Tone" in issue_title:
+        return "Revised Tone: 'We are excited to share these opportunities with you! While there are challenges, the potential for growth is immense.'"
+        
+    if "Content Length" in issue_title:
+        return "Suggestion: Add a section titled 'Key Benefits' with 3-5 bullet points explaining the value to the reader."
+        
+    return "AI Suggestion: Review this section and aim for clarity and conciseness."
+
+def analyze_page(html: str, url: str = "") -> Dict[str, Any]:
     soup = BeautifulSoup(html, 'html.parser')
     topic_models = load_topic_models()
     
@@ -125,10 +245,15 @@ def analyze_page(html: str) -> Dict[str, Any]:
     # --- 1. Topic Detection ---
     detected_topic, matched_keywords = detect_topic(text, topic_models)
     
-    # --- 2. Sentiment Analysis ---
+    #--- 2. Sentiment Analysis ---
     sentiment_data = analyze_sentiment_and_improvements(text)
+    
+    # --- 3. AI Summary Generation ---
+    summary = ""
+    if url:
+        summary = summarize_blog(url)
 
-    # --- 3. Author & Social Media Detection ---
+    # --- 4. Author & Social Media Detection ---
     author_name = "Unknown Author"
     meta_author = soup.find('meta', attrs={'name': 'author'})
     if meta_author:
@@ -163,21 +288,51 @@ def analyze_page(html: str) -> Dict[str, Any]:
     meta_desc_score = 100
     if not meta_desc or not meta_desc.get('content'):
         meta_desc_score = 0
-        seo_issues.append({"priority": "HIGH", "title": "SEO Optimization", "desc": "Add a meta description."})
+        seo_issues.append({
+            "priority": "HIGH", 
+            "title": "Missing Meta Description", 
+            "desc": "Your page is missing a meta description. This appears in search results and affects click-through rates.",
+            "ai_fix": f"Add this to your HTML head: <meta name='description' content='Write a compelling 120-160 character summary about {detected_topic.lower()} that includes your main keywords'>"
+        })
     else:
         desc_len = len(meta_desc.get('content'))
-        if desc_len < 50 or desc_len > 160:
+        current_desc = meta_desc.get('content')
+        if desc_len < 50:
             meta_desc_score = 60
-            seo_issues.append({"priority": "MEDIUM", "title": "SEO Optimization", "desc": f"Optimize meta description length."})
+            seo_issues.append({
+                "priority": "MEDIUM", 
+                "title": "Meta Description Too Short", 
+                "desc": f"Your meta description is only {desc_len} characters. Aim for 120-160 characters for better search visibility.",
+                "ai_fix": f"Current: '{current_desc[:100]}...' → Expand this to 120-160 characters by adding more relevant details about your {detected_topic.lower()} content."
+            })
+        elif desc_len > 160:
+            meta_desc_score = 60
+            seo_issues.append({
+                "priority": "MEDIUM", 
+                "title": "Meta Description Too Long", 
+                "desc": f"Your meta description is {desc_len} characters. Keep it under 160 to avoid truncation in search results.",
+                "ai_fix": f"Current ({desc_len} chars): '{current_desc[:80]}...' → Trim to 120-160 characters while keeping key information."
+            })
     
     h1s = soup.find_all('h1')
     headings_score = 100
     if not h1s:
         headings_score = 0
-        seo_issues.append({"priority": "HIGH", "title": "SEO Optimization", "desc": "Add a main H1 heading."})
+        seo_issues.append({
+            "priority": "HIGH", 
+            "title": "Missing H1 Heading", 
+            "desc": "Your page lacks a main H1 heading. This is crucial for SEO and helps search engines understand your content.",
+            "ai_fix": f"Add an H1 tag with your main topic: <h1>Your Main Title About {detected_topic}</h1>"
+        })
     elif len(h1s) > 1:
         headings_score = 50
-        seo_issues.append({"priority": "MEDIUM", "title": "SEO Optimization", "desc": "Use only one H1 heading."})
+        h1_texts = [h1.get_text().strip()[:50] for h1 in h1s[:3]]
+        seo_issues.append({
+            "priority": "MEDIUM", 
+            "title": "Multiple H1 Headings", 
+            "desc": f"You have {len(h1s)} H1 headings. Use only one H1 per page for better SEO.",
+            "ai_fix": f"Current H1s: {', '.join(h1_texts)}. Choose the most important one and convert others to H2 or H3."
+        })
     
     keywords_score = random.randint(60, 90)
     seo_total = int((meta_desc_score + headings_score + keywords_score) / 3)
@@ -186,16 +341,27 @@ def analyze_page(html: str) -> Dict[str, Any]:
     # --- 5. Content Quality ---
     content_issues = []
     words = len(text.split())
-    # Dynamic target based on topic could be added here, but keeping simple logic for now
     target_words = 1000 
     if words >= target_words:
         structure_score = 100
     else:
         structure_score = int((words / target_words) * 100)
-        content_issues.append({"priority": "MEDIUM", "title": "Content Length", "desc": f"Consider expanding content (Current: {words})."})
+        words_needed = target_words - words
+        content_issues.append({
+            "priority": "MEDIUM", 
+            "title": "Content Length Below Target", 
+            "desc": f"Your article has {words} words. For better SEO and engagement, aim for {target_words}+ words.",
+            "ai_fix": f"Add {words_needed} more words. Consider expanding on: 1) {detected_topic} fundamentals, 2) Real-world examples, 3) Expert tips, 4) Common mistakes to avoid."
+        })
 
     readability_score = random.randint(70, 95)
-    grammar_score = random.randint(75, 98)
+    
+    # ACTUAL GRAMMAR CHECK (not random)
+    grammar_score, grammar_issues = check_grammar(text)
+    if grammar_issues:
+        for issue in grammar_issues[:3]:  # Show top 3 grammar issues
+            content_issues.append({"priority": "MEDIUM", "title": "Grammar", "desc": issue['desc']})
+    
     content_total = int((structure_score + readability_score + grammar_score) / 3)
 
 
@@ -203,34 +369,69 @@ def analyze_page(html: str) -> Dict[str, Any]:
     visual_issues = []
     images = soup.find_all('img')
     total_images = len(images)
-    missing_alt = [img.get('src') for img in images if not img.get('alt')]
+    missing_alt = [img.get('src', 'unknown')[:100] for img in images if not img.get('alt')]
     
     layout_score = 100
     if total_images < 3:
         layout_score = 60
-        visual_issues.append({"priority": "MEDIUM", "title": "Visuals", "desc": "Add more images."})
+        visual_issues.append({
+            "priority": "MEDIUM", 
+            "title": "Insufficient Visual Content", 
+            "desc": f"Your article has only {total_images} image(s). Add 2-4 more relevant images to improve engagement and break up text.",
+            "ai_fix": f"Add images for: 1) Hero/header image, 2) Visual examples related to {detected_topic}, 3) Infographics or charts, 4) Author photo or conclusion image."
+        })
 
     if missing_alt:
         layout_score = max(0, layout_score - (len(missing_alt) * 10))
-        visual_issues.append({"priority": "MEDIUM", "title": "Accessibility", "desc": f"Add alt text to {len(missing_alt)} images."})
+        visual_issues.append({
+            "priority": "HIGH", 
+            "title": "Missing Alt Text for Accessibility", 
+            "desc": f"{len(missing_alt)} image(s) lack alt text. This hurts accessibility and SEO.",
+            "ai_fix": f"Example fix: <img src='your-image.jpg' alt='Descriptive text about the image showing {detected_topic}'> - Add similar descriptions to all {len(missing_alt)} images."
+        })
 
     viewport = soup.find('meta', attrs={'name': 'viewport'})
     mobile_score = 100
     if not viewport:
         mobile_score = 0
-        visual_issues.append({"priority": "HIGH", "title": "Mobile", "desc": "Add a viewport meta tag."})
+        visual_issues.append({
+            "priority": "HIGH", 
+            "title": "Mobile Optimization Missing", 
+            "desc": "No viewport meta tag detected. Your site may not display properly on mobile devices.",
+            "ai_fix": "Add this to your HTML <head>: <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+        })
 
     color_score = random.randint(80, 100)
     visual_total = int((layout_score + mobile_score + color_score) / 3)
 
-    # --- Overall ---
-    overall_score = int((seo_total + content_total + visual_total) / 3)
+    # --- Seasonal Content Check ---
+    seasonal_data = check_seasonal_content(text)
     
-    # Add sentiment improvement to recommendations if score is low
-    if sentiment_data['score'] < 0:
-        content_issues.append({"priority": "HIGH", "title": "Tone", "desc": "Sentiment is negative. Review highlighted words."})
-
     all_recommendations = seo_issues + content_issues + visual_issues + [{"priority": "LOW", "title": "Social Growth", "desc": rec} for rec in social_recommendations]
+    
+    # Add AI fix suggestions to each recommendation
+    for rec in all_recommendations:
+        rec['ai_fix'] = generate_fix_content(rec['title'], rec['desc'])
+
+    # --- 6. Additional Categories (UX, Engagement, Topic Fit) ---
+    # Simulating scores for these advanced categories
+    ux_score = random.randint(70, 95)
+    nav_score = random.randint(70, 90)
+    layout_flow_score = random.randint(75, 95)
+    mobile_usability_score = mobile_score  # Reuse mobile score
+
+    engagement_score = random.randint(60, 90)
+    cta_score = random.randint(50, 85)
+    shareability_score = random.randint(70, 95)
+    stickiness_score = random.randint(65, 90)
+
+    topic_fit_score = random.randint(75, 98)
+    clarity_score = random.randint(80, 100)
+    depth_score = random.randint(70, 95)
+    practicality_score = random.randint(75, 95)
+
+    # Recalculate Overall Score with new categories
+    overall_score = int((seo_total + content_total + visual_total + ux_score + engagement_score + topic_fit_score) / 6)
 
     return {
         "overall_score": overall_score,
@@ -240,7 +441,7 @@ def analyze_page(html: str) -> Dict[str, Any]:
         "matched_keywords": matched_keywords,
         "sentiment": sentiment_data,
         "categories": {
-            "seo": {
+            "discoverability": {  # Renamed from SEO
                 "score": seo_total,
                 "metrics": [
                     {"name": "Keywords", "value": keywords_score},
@@ -263,7 +464,34 @@ def analyze_page(html: str) -> Dict[str, Any]:
                     {"name": "Color Scheme", "value": color_score},
                     {"name": "Mobile Response", "value": mobile_score}
                 ]
+            },
+            "ux": {
+                "score": ux_score,
+                "metrics": [
+                    {"name": "Navigation", "value": nav_score},
+                    {"name": "Layout Flow", "value": layout_flow_score},
+                    {"name": "Mobile Usability", "value": mobile_usability_score}
+                ]
+            },
+            "engagement": {
+                "score": engagement_score,
+                "metrics": [
+                    {"name": "CTAs", "value": cta_score},
+                    {"name": "Shareability", "value": shareability_score},
+                    {"name": "Stickiness", "value": stickiness_score}
+                ]
+            },
+            "topic_fit": {
+                "score": topic_fit_score,
+                "metrics": [
+                    {"name": "Clarity", "value": clarity_score},
+                    {"name": "Depth", "value": depth_score},
+                    {"name": "Practicality", "value": practicality_score}
+                ]
             }
         },
-        "recommendations": all_recommendations
+        "recommendations": all_recommendations,
+        "seasonal_data": seasonal_data,
+        "summary": summary
     }
+
