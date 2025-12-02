@@ -2,6 +2,13 @@
 
 A powerful Django-based blog analysis tool that provides actionable insights on SEO, Content Quality, Visual Design, UX, Engagement, and Topic Fit. Perfect for bloggers and content creators who want to optimize their content for better reach and engagement.
 
+Team: ENTR
+Elene Kuprashvili
+Nataliia Tertychna
+Turan Yusif
+Renata Parmanova
+
+
 ## 📺 Demo & Presentation
 
 ### 🎥 Video Demo
